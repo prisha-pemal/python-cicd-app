@@ -11,7 +11,7 @@ pipeline {
         stage('1. Clone Code') {
             steps {
                 // Pull code from Git
-                git branch: 'main', url: '<your-repo-url>'
+                git branch: 'main', url: 'https://github.com/prisha-pemal/python-cicd-app.git'
             }
         }
 
