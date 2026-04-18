@@ -8,56 +8,40 @@ pipeline {
 
     stages {
 
-        stage('1. Clone Code') {
+        stage('Install Dependencies') {
             steps {
-                // Pull code from Git
-                git branch: 'main', url: 'https://github.com/prisha-pemal/python-cicd-app.git'
+                // Windows command
+                bat 'pip install -r requirements.txt'
             }
         }
 
-        stage('2. Install Dependencies') {
+        stage('Run Tests') {
             steps {
-                // Install Python dependencies
-                sh 'pip install -r requirements.txt'
+                bat 'pytest'
             }
         }
 
-        stage('3. Run Tests') {
+        stage('Build Docker Image') {
             steps {
-                // Run pytest
-                sh 'pytest'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
-        stage('4. Build Docker Image') {
+        stage('Stop Old Container') {
             steps {
-                // Build Docker image
-                sh 'docker build -t $IMAGE_NAME .'
+                bat 'docker rm -f %CONTAINER_NAME% || exit 0'
             }
         }
 
-        stage('5. Stop Old Container') {
+        stage('Run New Container') {
             steps {
-                // Stop and remove old container if exists
-                sh '''
-                docker rm -f $CONTAINER_NAME || true
-                '''
+                bat 'docker run -d -p 5000:5000 --name %CONTAINER_NAME% %IMAGE_NAME%'
             }
         }
 
-        stage('6. Run New Container') {
+        stage('Verify Deployment') {
             steps {
-                // Run container
-                sh '''
-                docker run -d -p 5000:5000 --name $CONTAINER_NAME $IMAGE_NAME
-                '''
-            }
-        }
-
-        stage('7. Verify Deployment') {
-            steps {
-                // Check if app is running
-                sh 'curl http://localhost:5000'
+                bat 'curl http://localhost:5000'
             }
         }
     }
